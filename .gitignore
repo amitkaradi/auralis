@@ -1,0 +1,38 @@
+# Build artifacts
+build/
+dist/
+bundled_models/
+*.spec.bak
+__pycache__/
+*.pyc
+
+# Local environment
+.venv/
+*.egg-info/
+
+# User data — never commit
+recordings/
+live_transcripts/
+post_processed_transcripts/
+triggers/
+transcripts/
+logs/
+config.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Misc
+*.log
+*.tmp
+
+# Local-only history / scratch
+# Snapshot of the abandoned Tk redesign
+auralis_tk.py.bak
+# Source design package (kept locally for reference; not part of the ship)
+design_extracted/
+# Per-machine Claude Code settings
+.claude/
+

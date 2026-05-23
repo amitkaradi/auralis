@@ -1,0 +1,150 @@
+/* App-mode overrides — when the design components are mounted as the real
+   app (not inside the design canvas), the AuFrame should fill the entire
+   window without the rounded corners/border that the canvas added. */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100vh;
+  width: 100vw;
+}
+
+/* In app mode the frame fills the viewport. */
+.au-frame {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  isolation: auto;
+}
+
+/* The titlebar's drag region uses a custom property the design exposes — Eel
+   on Chrome --app= can't drag the window via -webkit-app-region, so hide the
+   custom titlebar buttons; the browser chrome shows native ones. */
+.au-titlebar { display: none; }
+
+/* Make the body take the full height now that the titlebar is gone. */
+.au-body { height: 100%; }
+
+/* Indeterminate progress bar for post-processing (Python doesn't yet
+   report percentage). */
+@keyframes au-indeterm {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
+
+/* Blinking caret used at the end of the in-progress transcript segment. */
+@keyframes au-blink-kf {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+.au-blink {
+  animation: au-blink-kf 1.1s steps(1, end) infinite;
+}
+
+/* Pulsing dot used inside the loading/recording variants of the morphing
+   record CTA. Gentle so it doesn't compete with the transcript caret. */
+@keyframes au-rec-pulse-kf {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.18); transform: scale(1); }
+  50%      { box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.05); transform: scale(0.9); }
+}
+.au-rec-pulse {
+  animation: au-rec-pulse-kf 1.4s ease-in-out infinite;
+}
+
+/* Sidebar status (Whisper · ready) — clickable affordance. */
+.au-sb-foot .foot-meta { cursor: pointer; }
+.au-sb-foot .foot-meta:hover .foot-sub { color: var(--text-2); }
+
+/* Right-to-left helper so embedded Hebrew renders naturally inside an
+   otherwise-LTR line. */
+.bidi { unicode-bidi: plaintext; }
+
+/* Toast variants — set on `.t-ico` */
+.au-toast .t-ico.is-good   { background: var(--good-soft);   color: var(--good); }
+.au-toast .t-ico.is-accent { background: var(--accent-soft); color: var(--accent); }
+.au-toast .t-ico.is-warn   { background: var(--warn-soft);   color: var(--warn); }
+
+/* Modal scaffolding (About, Setup checklist, confirms). */
+.au-modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(8, 11, 16, 0.55);
+  display: grid; place-items: center;
+  z-index: 100;
+  backdrop-filter: blur(2px);
+}
+.au-modal {
+  width: 480px; max-width: calc(100% - 40px);
+  max-height: 80vh;
+  display: flex; flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-2);
+  overflow: hidden;
+}
+.au-modal-hd {
+  display: flex; align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--hairline);
+}
+.au-modal-hd .t {
+  font-size: 14px; font-weight: 600; color: var(--text);
+  flex: 1;
+}
+.au-modal-hd .x {
+  width: 26px; height: 26px;
+  display: grid; place-items: center;
+  border-radius: 6px;
+  color: var(--text-3); cursor: pointer;
+  font-size: 18px;
+}
+.au-modal-hd .x:hover { background: var(--surface-2); color: var(--text); }
+.au-modal-bd {
+  padding: 18px;
+  overflow: auto;
+  flex: 1 1 auto;
+}
+.au-modal-ft {
+  display: flex; gap: 8px; justify-content: flex-end;
+  padding: 12px 18px;
+  border-top: 1px solid var(--hairline);
+}
+.au-kv {
+  display: grid; grid-template-columns: 90px 1fr;
+  gap: 8px 14px; font-size: 13px;
+}
+.au-kv .k { color: var(--text-3); font-weight: 500; }
+.au-kv .v { color: var(--text); }
+
+/* Kebab-style popover menu (for the per-row Library kebab). */
+.au-menu {
+  position: absolute;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+  min-width: 200px;
+  box-shadow: var(--shadow-2);
+  z-index: 60;
+}
+.au-menu-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px;
+  font-size: 13px; color: var(--text-2);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.au-menu-item:hover { background: var(--surface-2); color: var(--text); }
+.au-menu-item.is-danger { color: var(--rec); }
+.au-menu-item.is-danger:hover { background: var(--rec-soft); color: var(--rec); }
+.au-menu-sep {
+  height: 1px; background: var(--hairline); margin: 4px 2px;
+}
