@@ -68,7 +68,7 @@ Then:
 build_release.bat
 ```
 
-Output: `dist\AuralisSetup-1.1.0.exe` — a single double-click installer to distribute via GitHub Releases or your own site.
+Output: `dist\AuralisSetup-1.1.1.exe` — a single double-click installer to distribute via GitHub Releases or your own site.
 
 ## File layout
 

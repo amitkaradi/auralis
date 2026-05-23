@@ -85,13 +85,13 @@ _log_handler.setFormatter(logging.Formatter(
 logging.basicConfig(level=logging.INFO, handlers=[_log_handler])
 log = logging.getLogger("auralis")
 log.info("=" * 60)
-log.info("Auralis v%s starting (Eel UI)", "1.1.0")
+log.info("Auralis v%s starting (Eel UI)", "1.1.1")
 
 SAMPLE_RATE = 16_000
 CHUNK_SECONDS = 30.0
 CONTEXT_SECONDS_FOR_TRIGGER = 120
 APP_NAME = "Auralis"
-APP_VERSION = "1.1.0"
+APP_VERSION = "1.1.1"
 APP_BUILD_DATE = "2026-05-20"
 APP_TAGLINE = "Listen. Transcribe. Study."
 APP_AUTHOR = "Amit"

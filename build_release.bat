@@ -1,7 +1,7 @@
 @echo off
 REM Build BOTH Auralis installers from a single run:
-REM   Pass 1: LITE  -> dist\AuralisSetup-1.1.0-lite.exe (~68 MB, no model)
-REM   Pass 2: FULL  -> dist\AuralisSetup-1.1.0.exe      (~1.6 GB, model bundled)
+REM   Pass 1: LITE  -> dist\AuralisSetup-1.1.1-lite.exe (~68 MB, no model)
+REM   Pass 2: FULL  -> dist\AuralisSetup-1.1.1.exe      (~1.6 GB, model bundled)
 REM
 REM Prereqs:
 REM   1. .venv exists       (run setup_and_run.bat once first)
@@ -81,7 +81,7 @@ REM ---------------------------------------------------------------------
 if "%ONLY_FULL%"=="1" goto :skip_lite
 
 echo ============================================================
-echo  Building AuralisSetup-1.1.0.exe (standard installer)
+echo  Building AuralisSetup-1.1.1.exe (standard installer)
 echo  Model downloads on first launch via the in-app picker.
 echo ============================================================
 
@@ -106,7 +106,7 @@ if errorlevel 1 (
 )
 echo.
 
-echo === Inno Setup -^> AuralisSetup-1.1.0.exe ===
+echo === Inno Setup -^> AuralisSetup-1.1.1.exe ===
 "%ISCC%" auralis.iss
 if errorlevel 1 (
     echo [!] Inno Setup failed on lite build.
@@ -175,7 +175,7 @@ pyinstaller --noconfirm --clean auralis.spec
 if errorlevel 1 (echo [!] PyInstaller failed on full build. & pause & exit /b 1)
 echo.
 
-echo === Inno Setup -^> AuralisSetup-1.1.0.exe ===
+echo === Inno Setup -^> AuralisSetup-1.1.1.exe ===
 "%ISCC%" auralis.iss
 if errorlevel 1 (echo [!] Inno Setup failed on full build. & pause & exit /b 1)
 echo.
@@ -183,8 +183,8 @@ echo.
 :done
 echo ============================================================
 echo  Build complete.
-if exist "dist\AuralisSetup-1.1.0-lite.exe" echo    Lite installer:  dist\AuralisSetup-1.1.0-lite.exe
-if exist "dist\AuralisSetup-1.1.0.exe"      echo    Full installer:  dist\AuralisSetup-1.1.0.exe
+if exist "dist\AuralisSetup-1.1.1-lite.exe" echo    Lite installer:  dist\AuralisSetup-1.1.1-lite.exe
+if exist "dist\AuralisSetup-1.1.1.exe"      echo    Full installer:  dist\AuralisSetup-1.1.1.exe
 echo    Standalone app:  dist\Auralis\Auralis.exe
 echo ============================================================
 pause

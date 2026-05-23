@@ -1,14 +1,14 @@
 ; Inno Setup script for Auralis. Compile with the free Inno Setup compiler:
 ;   https://jrsoftware.org/isdl.php
-; Output: dist\AuralisSetup-1.1.0.exe (one double-click installer).
+; Output: dist\AuralisSetup-1.1.1.exe (one double-click installer).
 
 #define AppName        "Auralis"
-#define AppVersion     "1.1.0"
+#define AppVersion     "1.1.1"
 #define AppPublisher   "Amit"
 #define AppURL         "https://github.com/amitkaradi/auralis"
 #define AppExeName     "Auralis.exe"
 ; Optional output-filename suffix so the same script can produce
-; AuralisSetup-1.1.0.exe (full) and AuralisSetup-1.1.0-lite.exe (no model).
+; AuralisSetup-1.1.1.exe (full) and AuralisSetup-1.1.1-lite.exe (no model).
 ; Override by passing /DBuildSuffix=-lite on the ISCC command line.
 #ifndef BuildSuffix
   #define BuildSuffix ""
