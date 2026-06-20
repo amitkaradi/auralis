@@ -21,13 +21,25 @@ Everything runs locally. Nothing leaves your machine.
 
 ## Install (end users)
 
-1. Download the latest `AuralisSetup-x.y.z.exe` from the Releases page.
+### Windows
+
+1. Download the latest `AuralisSetup-x.y.z.exe` from the [Releases page](https://github.com/amitkaradi/auralis/releases).
 2. Double-click to install. Wizard takes 30 seconds.
 3. Launch from the Start menu.
 4. First run shows a short onboarding (audio device + first course).
-5. First recording downloads the Whisper model (~1.5 GB) — one-time, cached forever.
+5. First recording downloads the Whisper model (~1.5 GB) — one-time, cached forever. The "full" installer ships the Hebrew model inside and is fully offline from launch.
+
+### macOS
+
+1. Download the latest `AuralisSetup-x.y.z.dmg` from the [Releases page](https://github.com/amitkaradi/auralis/releases).
+2. Double-click the `.dmg`, drag **Auralis** into Applications.
+3. First launch: macOS will warn about an unsigned app — right-click → Open → Open Anyway.
+4. To capture **system audio** on macOS you need a virtual audio device — install [**BlackHole 2ch**](https://existential.audio/blackhole/) (free), set it as your Mac's audio output, and Auralis will pick it up.
+5. The per-app capture mode (Specific app) is **Windows-only** for now — Mac users see only "Whole system audio".
 
 ## Install (from source — developers)
+
+### Windows
 
 1. Install **Python 3.12+** from https://www.python.org/downloads/windows/ (tick *"Add python.exe to PATH"*).
 2. Install **Google Chrome** or **Microsoft Edge** (used for the app window via [Eel](https://github.com/python-eel/Eel)). One is almost certainly already on Windows 11.
@@ -35,10 +47,33 @@ Everything runs locally. Nothing leaves your machine.
 4. Double-click `setup_and_run.bat`. First run creates `.venv`, installs deps (~2 minutes) and launches the app.
 
 ```
-git clone https://github.com/amitkaradi/auralis-.git C:\Auralis
+git clone https://github.com/amitkaradi/auralis.git C:\Auralis
 cd C:\Auralis
 setup_and_run.bat
 ```
+
+### macOS
+
+```sh
+git clone https://github.com/amitkaradi/auralis.git ~/Auralis
+cd ~/Auralis
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-mac.txt
+python auralis.py
+```
+
+Building a local `.dmg` (instead of letting CI do it):
+```sh
+pip install pyinstaller
+pyinstaller --noconfirm --clean auralis-mac.spec
+brew install create-dmg
+create-dmg --volname "Auralis" --window-pos 200 120 --window-size 600 380 \
+  --icon-size 100 --app-drop-link 450 190 \
+  dist/Auralis.dmg dist/Auralis.app
+```
+
+GitHub Actions auto-builds the `.dmg` for every `v*` tag — see `.github/workflows/build-mac.yml`.
 
 ## Architecture
 

@@ -1,0 +1,16 @@
+# macOS dependency list — used by .github/workflows/build-mac.yml.
+# Same as requirements.txt but without the Windows-only packages
+# (pycaw, comtypes, psutil-of-questionable-utility-on-mac).
+#
+# Per-app audio capture is Windows-only (WASAPI Process Loopback). On macOS
+# Auralis uses whole-system audio via `soundcard`, which requires a virtual
+# audio device — install BlackHole 2ch from https://existential.audio/blackhole/
+# and pick it as your Mac's audio output.
+
+soundcard>=0.4.3
+faster-whisper>=1.0.3
+numpy>=1.24
+huggingface_hub>=0.23.0
+
+# UI layer — Eel runs the browser (Chrome/Edge in app-mode) and bridges JS ↔ Python.
+eel>=0.18.0

@@ -35,4 +35,12 @@ auralis_tk.py.bak
 design_extracted/
 # Per-machine Claude Code settings
 .claude/
+# Other personal scratch files that live in this folder
+atlas-agency/
+att.txt
+tet_full.txt
+tmp_pdf*.py
+# Tooling-leftover names with non-printable characters from earlier sessions
+C*UsersamitkAppDataLocalTemp*
+
 

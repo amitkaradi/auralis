@@ -1,0 +1,122 @@
+name: Build macOS installer (.dmg)
+
+# Two triggers:
+#   1. Pushing a tag like v1.1.2 → builds the .dmg AND uploads it as an
+#      asset to the matching Release (the Release should already exist or
+#      be created from the same tag).
+#   2. Manual run from the Actions tab → builds the .dmg and uploads it as
+#      a workflow artifact (no Release publish). Useful for testing.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write  # needed to upload the .dmg to the Release
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-mac.txt
+          pip install pyinstaller
+
+      - name: Generate .icns icon from assets/auralis.png
+        run: |
+          src="assets/auralis.png"
+          if [ ! -f "$src" ]; then
+            echo "no source PNG, skipping icns generation"
+            exit 0
+          fi
+          mkdir -p auralis.iconset
+          sips -z 16 16     "$src" --out auralis.iconset/icon_16x16.png
+          sips -z 32 32     "$src" --out auralis.iconset/icon_16x16@2x.png
+          sips -z 32 32     "$src" --out auralis.iconset/icon_32x32.png
+          sips -z 64 64     "$src" --out auralis.iconset/icon_32x32@2x.png
+          sips -z 128 128   "$src" --out auralis.iconset/icon_128x128.png
+          sips -z 256 256   "$src" --out auralis.iconset/icon_128x128@2x.png
+          sips -z 256 256   "$src" --out auralis.iconset/icon_256x256.png
+          sips -z 512 512   "$src" --out auralis.iconset/icon_256x256@2x.png
+          sips -z 512 512   "$src" --out auralis.iconset/icon_512x512.png
+          sips -z 1024 1024 "$src" --out auralis.iconset/icon_512x512@2x.png
+          iconutil -c icns auralis.iconset -o assets/auralis.icns
+          ls -la assets/auralis.icns
+
+      - name: Build .app bundle with PyInstaller
+        run: |
+          pyinstaller --noconfirm --clean auralis-mac.spec
+          ls -la dist/
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Derive version (strip leading v from tag, else 'dev')
+        id: ver
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            v="${GITHUB_REF#refs/tags/v}"
+          else
+            v="dev-$(git rev-parse --short HEAD)"
+          fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "Version: $v"
+
+      - name: Build .dmg
+        run: |
+          v="${{ steps.ver.outputs.version }}"
+          out="dist/AuralisSetup-${v}.dmg"
+          # create-dmg fails silently on the first run sometimes (codesign
+          # warning), so we retry once. Window position/size mimic a typical
+          # macOS app drag-to-install layout.
+          create-dmg \
+            --volname "Auralis ${v}" \
+            --window-pos 200 120 \
+            --window-size 600 380 \
+            --icon-size 100 \
+            --icon "Auralis.app" 150 190 \
+            --app-drop-link 450 190 \
+            --hide-extension "Auralis.app" \
+            --no-internet-enable \
+            "$out" \
+            "dist/Auralis.app" \
+          || create-dmg \
+            --volname "Auralis ${v}" \
+            --window-pos 200 120 \
+            --window-size 600 380 \
+            --icon-size 100 \
+            --icon "Auralis.app" 150 190 \
+            --app-drop-link 450 190 \
+            --hide-extension "Auralis.app" \
+            --no-internet-enable \
+            "$out" \
+            "dist/Auralis.app"
+          ls -la "$out"
+
+      - name: Upload .dmg as workflow artifact (always)
+        uses: actions/upload-artifact@v4
+        with:
+          name: AuralisSetup-${{ steps.ver.outputs.version }}-mac
+          path: dist/AuralisSetup-*.dmg
+          retention-days: 30
+
+      - name: Attach .dmg to the GitHub Release (tag pushes only)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/AuralisSetup-*.dmg
+          fail_on_unmatched_files: true

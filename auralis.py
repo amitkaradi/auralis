@@ -671,16 +671,65 @@ def _format_duration(secs: float) -> str:
     return "{:02d}:{:02d}".format(m, s)
 
 
-def _set_windows_clipboard(text):
-    """Cross-process clipboard write that doesn't need a Tk root.
+def _set_clipboard(text):
+    """Cross-platform clipboard write that doesn't need a Tk root.
 
-    Falls back silently if `clip` isn't available (non-Windows).
+    Windows → `clip` (UTF-16 LE).
+    macOS   → `pbcopy` (UTF-8).
+    Linux   → tries `xclip`, then `xsel`. Silent no-op if neither installed.
     """
     try:
-        proc = subprocess.Popen(["clip"], stdin=subprocess.PIPE)
-        proc.communicate(input=text.encode("utf-16le"))
+        if sys.platform.startswith("win"):
+            proc = subprocess.Popen(["clip"], stdin=subprocess.PIPE)
+            proc.communicate(input=text.encode("utf-16le"))
+        elif sys.platform == "darwin":
+            proc = subprocess.Popen(["pbcopy"], stdin=subprocess.PIPE)
+            proc.communicate(input=text.encode("utf-8"))
+        else:
+            for cmd in (["xclip", "-selection", "clipboard"], ["xsel", "-b", "-i"]):
+                try:
+                    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+                    proc.communicate(input=text.encode("utf-8"))
+                    return
+                except FileNotFoundError:
+                    continue
     except Exception:
         pass
+
+
+def _open_path(path):
+    """Open `path` in the OS default application. Cross-platform."""
+    p = str(path)
+    try:
+        if sys.platform.startswith("win"):
+            os.startfile(p)
+        elif sys.platform == "darwin":
+            subprocess.Popen(["open", p])
+        else:
+            subprocess.Popen(["xdg-open", p])
+    except Exception:
+        pass
+
+
+def _reveal_in_folder(path):
+    """Show `path` in the OS file manager with the file pre-selected."""
+    p = Path(path)
+    try:
+        if sys.platform.startswith("win"):
+            subprocess.Popen(["explorer", "/select,", str(p)])
+        elif sys.platform == "darwin":
+            subprocess.Popen(["open", "-R", str(p)])
+        else:
+            subprocess.Popen(["xdg-open", str(p.parent)])
+    except Exception:
+        try:
+            _open_path(p.parent)
+        except Exception:
+            pass
+
+
+# Back-compat alias: some older call sites still import this name.
+_set_windows_clipboard = _set_clipboard
 
 
 def _find_companion(wav, root, course, category="", suffix=".txt"):
@@ -1247,18 +1296,14 @@ class AuralisApp:
 
     def open_path(self, path):
         try:
-            os.startfile(str(path))
+            _open_path(path)
             return {"ok": True}
         except Exception as e:
             return {"ok": False, "error": str(e)}
 
     def reveal_in_folder(self, path):
         try:
-            p = Path(path)
-            if sys.platform.startswith("win"):
-                subprocess.Popen(["explorer", "/select,", str(p)])
-            else:
-                os.startfile(str(p.parent))
+            _reveal_in_folder(path)
             return {"ok": True}
         except Exception as e:
             return {"ok": False, "error": str(e)}
